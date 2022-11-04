@@ -40,6 +40,7 @@ Note: If you access the CAP Java server directly without middleware, you will ha
 * ui5-deploy.yaml: this file is used to zip fiori content with xs-app file
 * package.json: contains scripts using ui5-deploy.yaml file
 * service path
+
 ![image](https://user-images.githubusercontent.com/38774601/199872822-7b3922c9-48ec-4326-8e41-f60590dd07de.png)
 
 * mta.yaml: this will create destination service for backend on BTP
