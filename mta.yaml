@@ -1,0 +1,176 @@
+_schema-version: '3.1'
+ID: TravelServiceJava
+version: 1.0.0-SNAPSHOT
+description: "TravelServiceJava application"
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npx -p @sap/cds-dk cds build --profile production,java
+        - npx -p @sap/cds-dk cds build --profile production,hana
+modules:
+  - name: TravelServiceJava-srv
+    type: java
+    path: srv
+    properties:
+      SPRING_PROFILES_ACTIVE: cloud
+      JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jdk.SAPMachineJDK']"
+      JBP_CONFIG_SAP_MACHINE_JRE: '{ jre: { version: 11.+ } }'
+    build-parameters:
+      builder: custom
+      commands:
+        - mvn clean package -DskipTests=true
+      build-result: target/*-exec.jar
+      ignore: ["node_modules/"]
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: TravelServiceJava-db
+      - name: travel-uaa
+
+  - name: TravelServiceJava-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: TravelServiceJava-db
+      - name: travel-uaa
+    build-parameters:
+      ignore: ["node_modules/"]
+
+   # ------------------ APPLICATION CONTENT ---------------------
+  - name: airline-appcontent
+  # ------------------------------------------------------------
+    type: com.sap.application.content
+    path: app
+    requires:
+      - name: travel-destination-service
+      - name: travel-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: travel-app-travel-airline
+          artifacts:
+            - airline.zip
+          target-path: resources/     
+
+  # ------------- APPLICATION: TRAVEL PROCESSOR ----------------
+  - name: travel-app-travel-airline
+  # ------------------------------------------------------------
+    type: html5
+    path: app/airline
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      supported-platforms: []
+
+  # ------------------ DESTINATION CONTENT ---------------------
+  - name: travel-destinationcontent
+  # ------------------------------------------------------------
+    type: com.sap.application.content
+    build-parameters:
+      no-source: true
+    requires:
+      - name: travel-uaa
+        parameters:
+          service-key:
+            name: travel-uaa-key
+      - name: travel-html5-repo-host
+        parameters:
+          service-key:
+            name: travel-html5-repo-host-key
+      - name: travel-destination-service
+        parameters:
+          content-target: true
+    parameters:
+      content:
+        instance:
+          existing_destinations_policy: update
+          destinations:
+            - Name: travel-html5-repository
+              ServiceInstanceName: travel-html5-repo-host
+              ServiceKeyName: travel-html5-repo-host-key
+              sap.cloud.service: sap.fe.cap.travel
+            - Name: travel-uaa
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: travel-uaa
+              ServiceKeyName: travel-uaa-key
+              sap.cloud.service: sap.fe.cap.travel
+
+
+resources:
+  - name: TravelServiceJava-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+    properties:
+      hdi-service-name: ${service-name}
+
+  # ------------------------------------------------------------
+  - name: travel-html5-repo-runtime
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
+
+  # ------------------------------------------------------------
+  - name: travel-html5-repo-host
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+
+  # ------------------------------------------------------------
+  - name: travel-destination-service
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: srv-api
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        version: 1.0.0
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: TravelServiceJava-srv
+                URL: ~{srv-api/srv-url}
+                Authentication: NoAuthentication
+                Type: HTTP
+                ProxyType: Internet
+                HTML5.ForwardAuthToken: true
+                HTML5.DynamicDestination: true
+
+  # ------------------------------------------------------------
+  - name: travel-uaa
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: travel-${space}
+        tenant-mode: dedicated
+        role-collections:
+          - name: 'travel-admin-${space}'
+            description: Manage Master Data
+            role-template-references:
+              - $XSAPPNAME.admin

@@ -1,0 +1,160 @@
+{
+    "_version": "1.42.0",
+    "sap.app": {
+        "id": "airline",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "offline": false,
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:lrop",
+            "version": "1.7.6",
+            "toolsId": "efee678e-076d-4773-9e10-76de48470705"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "admin/",
+                "type": "OData",
+                "settings": {
+                    "odataVersion": "4.0"
+                }
+            }
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "airline-inbound": {
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    },
+                    "semanticObject": "airline",
+                    "action": "manage",
+                    "title": "{{flpTitle}}",
+                    "subTitle": "{{flpSubtitle}}",
+                    "icon": ""
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.102.1",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.ushell": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "airline.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "AirelineList",
+                    "target": "AirelineList"
+                },
+                {
+                    "pattern": "Aireline({key}):?query:",
+                    "name": "AirelineObjectPage",
+                    "target": "AirelineObjectPage"
+                }
+            ],
+            "targets": {
+                "AirelineList": {
+                    "type": "Component",
+                    "id": "AirelineList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "entitySet": "Aireline",
+                            "variantManagement": "Page",
+                            "navigation": {
+                                "Aireline": {
+                                    "detail": {
+                                        "route": "AirelineObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "AirelineObjectPage": {
+                    "type": "Component",
+                    "id": "AirelineObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "entitySet": "Aireline"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sap.platform.hcp": {
+        "_version": "1.1.0",
+        "uri": ""
+    },
+    "sap.fiori": {
+        "_version": "1.1.0",
+        "registrationIds": [],
+        "archeType": "transactional"
+    },
+    "sap.cloud": {
+        "public": true,
+        "service": "sap.fe.cap.travel"
+    }
+}

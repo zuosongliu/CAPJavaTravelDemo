@@ -1,0 +1,9 @@
+### Create Aireline
+
+Post http://localhost:8080/odata/v4/AdminService/Aireline
+Content-Type: application/json
+
+{
+    "AirlineID": "001",
+    "Name": "Demo Aire 1"
+}
