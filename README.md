@@ -26,4 +26,20 @@ http://localhost:8080/index.html
 
 Note: If you access the CAP Java server directly without middleware, you will have to enter mock user credentials admin / admin which are maintained in file application.yml.
 
+### Find backend service in local
+
+* XS-APP : this file is used to route backend service
+* ui5.yaml: this file contains customMiddleware which is used to route locally
+** mountPath: it is used in manifest
+** baseUri: this one should be the backend service url which is routed to 
+** @(path:'/admin'): the service path should be contained in service cds file
+
+### Find backedn service on BTP
+
+* XS-APP: this file is used to route backedn service with the destination name
+* ui5-deploy.yaml: this file is used to zip fiori content with xs-app file
+* package.json: contains scripts using ui5-deploy.yaml file
+* mta.yaml: this will create destination service for backend on BTP
+![image](https://user-images.githubusercontent.com/38774601/199872254-a999c92d-d756-4b1f-b5b2-259eae2a03ed.png)
+
 
