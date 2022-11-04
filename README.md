@@ -30,9 +30,9 @@ Note: If you access the CAP Java server directly without middleware, you will ha
 
 * XS-APP : this file is used to route backend service
 * ui5.yaml: this file contains customMiddleware which is used to route locally
-** mountPath: it is used in manifest
-** baseUri: this one should be the backend service url which is routed to 
-** @(path:'/admin'): the service path should be contained in service cds file
+- mountPath: it is used in manifest
+- baseUri: this one should be the backend service url which is routed to 
+- @(path:'/admin'): the service path should be contained in service cds file
 
 ### Find backedn service on BTP
 
