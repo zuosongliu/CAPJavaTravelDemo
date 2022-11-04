@@ -1,7 +1,8 @@
 # CAPJavaTravelDemo
 
 This is a sample application for CAP JAVA demo with UI/DB/SRV. This app can be deployed to BTP directly and run locally.
-
+* Main branch: contains basic code which only have one service and one app
+* Dev  branch: travel service demo
 
 ## SAP Fiori UI with Java Backend
 
