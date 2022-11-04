@@ -47,5 +47,35 @@ Note: If you access the CAP Java server directly without middleware, you will ha
 ![image](https://user-images.githubusercontent.com/38774601/199872778-596f743e-81dd-4cb9-b622-2392a826c037.png)
 
 
+## Deployment to SAP Business Technology Platform
+
+The project contains a configuration for deploying the CAP services and the SAP Fiori app to the SAP Business Technology Platform (SAP BTP) using a managed application router. The app then becomes visible in the content manager of the SAP Launchpad service.
+
+### Build the Project
+
+Build the project from the command line:
+
+```shell
+mbt build
+```
+
+The build results will be stored in the directory `mta_archives`.
+
+### Deploy
+
+1. Log in to the target space.
+2. Deploy the MTA archive using the CF CLI: `cf deploy mta_archives/****.mtar`
+
+### Local Development with a HANA Cloud Instance
+
+You need to have access to a HANA Cloud instance and SAP BTP.
+
+1. Deploy the HDI content to a HANA HDI container (which is newly created on first call): `cds deploy --to hana`.
+2. Start the application with the Spring Profile `cloud`.
+   1. From Maven: `mvn spring-boot:run -Dspring-boot.run.profiles=cloud`
+   2. From your IDE with the JVM argument `-Dspring.profiles.active=cloud` or env variable `spring.profiles.active=cloud`
+
+The running application is now connected to its own HDI container/schema. Please keep in mind that the credentials for
+that HDI container are stored locally on your filesystem (default-env.json).
 
 
